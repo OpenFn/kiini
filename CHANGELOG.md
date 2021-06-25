@@ -27,3 +27,12 @@ ts-node test-server.ts
 Using the expression from experiment 1, and abstracting the http post into
 a module (which extends the axios type interface), we can get compiler errors
 if you call `post` incorrectly.
+
+# 2021-06-25 Experiment 3
+
+
+Trying to dynamically import modules _before_ the typechecker runs.
+
+Perhaps try and find out how the Program/Checker instance knows about imports 
+(when they are in the file to begin with) and recreate that?
+

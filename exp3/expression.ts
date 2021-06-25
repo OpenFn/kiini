@@ -1,11 +1,5 @@
-import * as adaptor from '../dummy-adaptor/http';
 
 import { readFileSync } from "fs";
-
-// setupClient
-// adaptor provides wrapper macros?
-// writeState function is injected? (sets filepath from compiler)
-
 const state = JSON.parse(readFileSync("./names.json", "utf8"));
 
 console.log("expression statement")

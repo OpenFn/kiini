@@ -5,7 +5,12 @@
 		"target": "es2020",
 		"jsx": "preserve",
 		"strictFunctionTypes": true,
-		"sourceMap": true
+		"sourceMap": true,
+		"plugins": [
+			{
+				"transform": "./exp3/transformer.ts"
+			}
+		]
 	},
 	"exclude": [
 		"node_modules",
