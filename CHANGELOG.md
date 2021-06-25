@@ -21,3 +21,9 @@ Running the testing web server.
 ```
 ts-node test-server.ts
 ```
+
+# 2021-06-25 Experiment 2
+
+Using the expression from experiment 1, and abstracting the http post into
+a module (which extends the axios type interface), we can get compiler errors
+if you call `post` incorrectly.
