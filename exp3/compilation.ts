@@ -12,7 +12,7 @@ const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed });
 import transformer from "./transformer";
 
 // Run source file through our transformer
-const result = ts.transform(source, [transformer]);
+const result = ts.transform(source, [transformer(program)]);
 
 // Create our output folder
 // const outputDir = path.resolve(__dirname, '../generated');
@@ -23,8 +23,6 @@ console.log(result.emitNodeWithNotification(ts.EmitHint.SourceFile, result.trans
 	console.log([hint, node]);
 	
 }));
-
-ts.getPre
 
 
 console.log(printer.printFile(result.transformed[0]));
