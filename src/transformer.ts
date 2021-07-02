@@ -3,16 +3,20 @@ const { factory } = ts;
 
 export interface TransformerOptions {}
 
-function getReturnTypeName(typeChecker: ts.TypeChecker, node: ts.Node) {
-  if (ts.isCallExpression(node)) {
-    return typeChecker
-      .getResolvedSignature(node)
-      .getReturnType()
-      .getSymbol()
-      .getEscapedName();
+function getReturnTypeName(
+  typeChecker: ts.TypeChecker,
+  node: ts.CallExpression
+) {
+  const symbol = typeChecker
+    .getResolvedSignature(node)
+    .getReturnType()
+    .getSymbol();
+
+  if (symbol) {
+    return symbol.getEscapedName();
   }
 
-  return false;
+  return symbol;
 }
 
 const testVisitor = (
@@ -24,20 +28,22 @@ const testVisitor = (
     // We could use ts-query to help narrow this down: CallExpression>PropertyAccessExpression>[name="get"]
     if (ts.isCallExpression(node)) {
       if (getReturnTypeName(typeChecker, node) == "Operation") {
-        // console.log("found call expression", node.getText());
-
-        return factory.createAwaitExpression(
-          factory.createCallExpression(
-            factory.updateCallExpression(
-              node,
-              node.expression,
+        // TODO: there are more ways to invalidate an Operation resolver transform
+        // not just a variable declaration.
+        if (!ts.isVariableDeclaration(node.parent)) {
+          return factory.createAwaitExpression(
+            factory.createCallExpression(
+              factory.updateCallExpression(
+                node,
+                node.expression,
+                undefined,
+                node.arguments
+              ),
               undefined,
-              node.arguments
-            ),
-            undefined,
-            [factory.createIdentifier("state")]
-          )
-        );
+              [factory.createIdentifier("state")]
+            )
+          );
+        }
       }
       return node;
     }

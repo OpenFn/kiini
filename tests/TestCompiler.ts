@@ -104,11 +104,13 @@ export class TestCompiler {
 
   transform(): string {
     const sourceFile = this.program.getSourceFile("index.ts");
-    const transformedSourceFile = ts.transform(sourceFile, [
-      transformer(this.program, {}),
-    ], TestCompiler.compilerOpts).transformed;
+    const transformedSourceFile = ts.transform(
+      sourceFile,
+      [transformer(this.program, {})],
+      TestCompiler.compilerOpts
+    ).transformed;
 
-    const printer = ts.createPrinter();
+    const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed });
     return format(printer.printFile(transformedSourceFile[0]));
   }
 }

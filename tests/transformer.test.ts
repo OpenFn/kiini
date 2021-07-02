@@ -5,7 +5,13 @@ const exampleExpression = format(`
 import * as adaptor from "@openfn/language-http";
 
 export default async function main() {
+  function foo() {};
+
+  console.log(foo());
+
   adaptor.get("http://ipv4.icanhazip.com", {})
+  let customResult = adaptor.get("http://ipv4.icanhazip.com", {})
+  await customResult(state);
 }
 `);
 
@@ -15,11 +21,15 @@ test("can compare output to a string", () => {
 
   // add a call to something that isn't an adaptor to check it won't mess with that.
   expect(compiler.transform()).toEqual(
-    format(
-      `import * as adaptor from "@openfn/language-http";
-       export default async function main() {
-         await adaptor.get("http://ipv4.icanhazip.com", {})(state);
-       }`
-    )
+    format(`
+      import * as adaptor from "@openfn/language-http";
+      export default async function main() {
+        function foo() {}
+        console.log(foo());
+        await adaptor.get("http://ipv4.icanhazip.com", {})(state);
+        let customResult = adaptor.get("http://ipv4.icanhazip.com", {})
+        await customResult(state);
+      }
+    `)
   );
 });
