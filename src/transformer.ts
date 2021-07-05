@@ -1,4 +1,5 @@
 import * as ts from "typescript";
+import { wrapWithRuntime } from "../tests/TestCompiler";
 const { factory } = ts;
 
 export interface TransformerOptions {}
@@ -22,7 +23,7 @@ function getReturnTypeName(
 const testVisitor = (
   ctx: ts.TransformationContext,
   typeChecker: ts.TypeChecker,
-  _sf: ts.SourceFile
+  sf: ts.SourceFile
 ) => {
   const visitor: ts.Visitor = (node: ts.Node): ts.Node => {
     // We could use ts-query to help narrow this down: CallExpression>PropertyAccessExpression>[name="get"]
@@ -56,9 +57,15 @@ const testVisitor = (
 
 // This is a 'program' style transfomer, this is import since we use the
 // typeChecker to validate Operation return types that an expression main use.
-export default function (program: ts.Program, _pluginOptions: {}) {
+export default function (
+  program: ts.Program,
+  pluginOptions: { wrapWithRuntime?: string }
+) {
   return (ctx: ts.TransformationContext) => {
     return (sourceFile: ts.SourceFile) => {
+      if (pluginOptions.wrapWithRuntime) {
+        sourceFile = wrapWithRuntime(sourceFile, pluginOptions.wrapWithRuntime);
+      }
       const visitor = testVisitor(ctx, program.getTypeChecker(), sourceFile);
       return ts.visitEachChild(sourceFile, visitor, ctx);
     };

@@ -35,13 +35,23 @@ export function addAdaptorFSMap(
 
   return fsMap;
 }
+
+type TransformerOptions = {
+  wrapWithRuntime?: string;
+};
 export class TestCompiler {
   fsMap: Map<string, string>;
   env: VirtualTypeScriptEnvironment;
   program: ts.Program;
   system: ts.System;
+  transformOptions: {};
 
-  constructor(adaptorPackagePath: string, expression: string) {
+  constructor(
+    adaptorPackagePath: string,
+    expression: string,
+    transformOptions: TransformerOptions = {}
+  ) {
+    this.transformOptions = transformOptions;
     // You start with creating a map which represents all the files in the virtual ts.System
     this.fsMap = createDefaultMapFromNodeModules({
       target: ts.ScriptTarget.ES2020,
@@ -66,6 +76,17 @@ export class TestCompiler {
 
   addAdaptorFSMap(adaptorPackagePath: string) {
     addAdaptorFSMap(this.fsMap, adaptorPackagePath);
+  }
+
+  wrap(
+    func: (sf: ts.SourceFile, ...args: any[]) => ts.SourceFile,
+    ...args: any[]
+  ) {
+    return func(this.sourceFile, ...args);
+  }
+
+  public get sourceFile(): ts.SourceFile {
+    return this.program.getSourceFile("index.ts");
   }
 
   compile(): string {
@@ -106,11 +127,45 @@ export class TestCompiler {
     const sourceFile = this.program.getSourceFile("index.ts");
     const transformedSourceFile = ts.transform(
       sourceFile,
-      [transformer(this.program, {})],
+      [transformer(this.program, this.transformOptions)],
       TestCompiler.compilerOpts
     ).transformed;
 
     const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed });
     return format(printer.printFile(transformedSourceFile[0]));
   }
+}
+
+export function wrapWithRuntime(
+  expressionSource: ts.SourceFile,
+  adaptorModule: string
+): ts.SourceFile {
+  const { factory } = ts;
+
+  return factory.updateSourceFile(expressionSource, [
+    factory.createImportDeclaration(
+      undefined,
+      undefined,
+      factory.createImportClause(
+        false,
+        undefined,
+        factory.createNamespaceImport(factory.createIdentifier("adaptor"))
+      ),
+      factory.createStringLiteral(adaptorModule)
+    ),
+    factory.createFunctionDeclaration(
+      undefined,
+      [
+        factory.createModifier(ts.SyntaxKind.ExportKeyword),
+        factory.createModifier(ts.SyntaxKind.DefaultKeyword),
+        factory.createModifier(ts.SyntaxKind.AsyncKeyword),
+      ],
+      undefined,
+      factory.createIdentifier("main"),
+      undefined,
+      [],
+      undefined,
+      factory.createBlock(expressionSource.statements, true)
+    ),
+  ]);
 }

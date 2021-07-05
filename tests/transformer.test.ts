@@ -1,4 +1,4 @@
-import { TestCompiler } from "./TestCompiler";
+import { TestCompiler, wrapWithRuntime } from "./TestCompiler";
 import { format } from "./Utils";
 
 const exampleExpression = format(`
@@ -29,6 +29,27 @@ test("can compare output to a string", () => {
         await adaptor.get("http://ipv4.icanhazip.com", {})(state);
         let customResult = adaptor.get("http://ipv4.icanhazip.com", {})
         await customResult(state);
+      }
+    `)
+  );
+});
+
+test("can wrap an expression in a runtime", () => {
+  const adaptorPackagePath = "../language-http";
+  const compiler = new TestCompiler(
+    adaptorPackagePath,
+    "adaptor.get('1', {});",
+    { wrapWithRuntime: "@openfn/language-http" }
+  );
+
+  // compiler.wrap(wrapWithRuntime, "@openfn/language-http");
+
+  // add a call to something that isn't an adaptor to check it won't mess with that.
+  expect(compiler.transform()).toEqual(
+    format(`
+      import * as adaptor from "@openfn/language-http";
+      export default async function main() {
+        adaptor.get("1", {});
       }
     `)
   );
