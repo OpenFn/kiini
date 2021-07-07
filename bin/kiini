@@ -1,0 +1,6 @@
+#!/usr/bin/env node
+const yargs = require("yargs");
+const { hideBin } = require("yargs/helpers");
+
+const { compile } = require("../dist/cli");
+yargs(hideBin(process.argv)).command(compile).argv;

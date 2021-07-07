@@ -1,5 +1,5 @@
 import * as ts from "typescript";
-import { wrapWithRuntime } from "../tests/TestCompiler";
+// import { wrapWithRuntime } from "../tests/TestCompiler";
 const { factory } = ts;
 
 export interface TransformerOptions {}
@@ -63,9 +63,9 @@ export default function (
 ) {
   return (ctx: ts.TransformationContext) => {
     return (sourceFile: ts.SourceFile) => {
-      if (pluginOptions.wrapWithRuntime) {
-        sourceFile = wrapWithRuntime(sourceFile, pluginOptions.wrapWithRuntime);
-      }
+      // if (pluginOptions.wrapWithRuntime) {
+      //   sourceFile = wrapWithRuntime(sourceFile, pluginOptions.wrapWithRuntime);
+      // }
       const visitor = testVisitor(ctx, program.getTypeChecker(), sourceFile);
       return ts.visitEachChild(sourceFile, visitor, ctx);
     };
