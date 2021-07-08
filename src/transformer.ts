@@ -55,17 +55,14 @@ const testVisitor = (
   return visitor;
 };
 
-// This is a 'program' style transfomer, this is import since we use the
+// This is a 'program' style transfomer, this is important since we use the
 // typeChecker to validate Operation return types that an expression main use.
 export default function (
   program: ts.Program,
   pluginOptions: { wrapWithRuntime?: string }
-) {
+): ts.TransformerFactory<ts.SourceFile> {
   return (ctx: ts.TransformationContext) => {
     return (sourceFile: ts.SourceFile) => {
-      // if (pluginOptions.wrapWithRuntime) {
-      //   sourceFile = wrapWithRuntime(sourceFile, pluginOptions.wrapWithRuntime);
-      // }
       const visitor = testVisitor(ctx, program.getTypeChecker(), sourceFile);
       return ts.visitEachChild(sourceFile, visitor, ctx);
     };
