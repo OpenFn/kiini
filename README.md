@@ -2,6 +2,26 @@
 
 OpenFn Future Compiler
 
+## CLI
+
+### `transform`
+
+Using a specified tranform, take an input file (expression) pass it through
+the compiler and return the result via STDOUT.
+
+**Example**
+
+```
+./bin/kiini transform -a language-http -t legacy test.js
+```
+
+- `-a` Specify the adaptor
+- `-t` Specify the tranform/compiler to use
+- `<expression>` Location of the source file to be transformed
+
+> This is still very much a work in progress and this interface is like to
+> change. Currently there is only one compiler available (`legacy`).
+
 ## Development
 
 ### Working on the CLI

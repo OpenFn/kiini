@@ -40,7 +40,7 @@ export class BaseCompiler {
   env: VirtualTypeScriptEnvironment;
   system: ts.System;
   transformers: Array<
-    (program: ts.Program, {}) => ts.TransformerFactory<ts.SourceFile>
+    (program: ts.Program, options: {}) => ts.TransformerFactory<ts.SourceFile>
   >;
   transformOptions: {};
 
@@ -133,7 +133,9 @@ export class BaseCompiler {
       undefined,
       false,
       {
-        before: this.transformers.map((t) => t(this.program, {})), // [transformer(this.program, {})],
+        before: this.transformers.map((t) =>
+          t(this.program, this.transformOptions)
+        ), // [transformer(this.program, {})],
         after: [],
         afterDeclarations: [],
       }
@@ -171,38 +173,4 @@ export class BaseCompiler {
     // const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed });
     // return printer.printFile(transformedSourceFile[0]);
   }
-}
-
-export function wrapWithRuntime(
-  expressionSource: ts.SourceFile,
-  adaptorModule: string
-): ts.SourceFile {
-  const { factory } = ts;
-
-  return factory.updateSourceFile(expressionSource, [
-    factory.createImportDeclaration(
-      undefined,
-      undefined,
-      factory.createImportClause(
-        false,
-        undefined,
-        factory.createNamespaceImport(factory.createIdentifier("adaptor"))
-      ),
-      factory.createStringLiteral(adaptorModule)
-    ),
-    factory.createFunctionDeclaration(
-      undefined,
-      [
-        factory.createModifier(ts.SyntaxKind.ExportKeyword),
-        factory.createModifier(ts.SyntaxKind.DefaultKeyword),
-        factory.createModifier(ts.SyntaxKind.AsyncKeyword),
-      ],
-      undefined,
-      factory.createIdentifier("main"),
-      undefined,
-      [],
-      undefined,
-      factory.createBlock(expressionSource.statements, true)
-    ),
-  ]);
 }
