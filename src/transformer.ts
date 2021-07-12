@@ -8,10 +8,8 @@ function getReturnTypeName(
   typeChecker: ts.TypeChecker,
   node: ts.CallExpression
 ) {
-  const symbol = typeChecker
-    .getResolvedSignature(node)
-    .getReturnType()
-    .getSymbol();
+  const signature = typeChecker.getResolvedSignature(node);
+  const symbol = signature ? signature?.getReturnType().getSymbol() : undefined;
 
   if (symbol) {
     return symbol.getEscapedName();

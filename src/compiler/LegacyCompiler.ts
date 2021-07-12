@@ -95,34 +95,71 @@ function expressionEntrypoint(
 
 function adaptorImport(
   ctx: ts.TransformationContext,
-  adaptorModule: string
+  adaptorModule: string,
+  adaptorExports: Array<string>
 ): ts.ImportDeclaration {
   const { factory } = ctx;
+
+  const importSpecifiers = adaptorExports.map((key) =>
+    factory.createImportSpecifier(undefined, factory.createIdentifier(key))
+  );
+
   return factory.createImportDeclaration(
     undefined,
     undefined,
     factory.createImportClause(
       false,
       undefined,
-      factory.createNamespaceImport(factory.createIdentifier("adaptor"))
+      factory.createNamedImports(importSpecifiers)
     ),
     factory.createStringLiteral(adaptorModule)
   );
 }
 
 function legacyTransform(
-  _program,
+  program: ts.Program,
   options: TransformOptions
 ): ts.TransformerFactory<ts.SourceFile> {
   return (ctx: ts.TransformationContext) => {
     const { factory } = ctx;
 
-    return (sourceFile: ts.SourceFile) => {
-      return factory.updateSourceFile(sourceFile, [
-        adaptorImport(ctx, options.adaptorModule),
-        expressionEntrypoint(ctx, asyncOperations(ctx, sourceFile.statements)),
-      ]);
-    };
+    // TODO: move this into somewhere common, we also do the samething in
+    // BaseCompiler.addTypeDefinition - ideally a transform doesn't need to
+    // look at the project files, so we may be able to get rid of this completely
+    const typedModulePath = options.adaptorModule
+      .replace("@", "")
+      .replace("/", "__");
+
+    // `getSourceFile` returns a SourceFileObject that has it's kind
+    // set to SourceFile (which lacks `symbol` and other Node/NodeObject properties)
+    // Might be worth asking the Typescript project about this.
+    const adaptorDts = program.getSourceFile(
+      `/${typedModulePath}.d.ts`
+    ) as unknown as { symbol: ts.Symbol } | undefined;
+
+    if (adaptorDts === undefined) {
+      throw new Error(
+        `Couldn't get type definitions for ${options.adaptorModule}`
+      );
+    } else {
+      // TODO: filter out the interface declarations (State, Operation, ...)
+      const exportedFunctions: Array<string> = [];
+
+      adaptorDts.symbol.exports!.forEach((key, value) => {
+        exportedFunctions.push(String(value));
+      });
+      console.log(exportedFunctions);
+
+      return (sourceFile: ts.SourceFile) => {
+        return factory.updateSourceFile(sourceFile, [
+          adaptorImport(ctx, options.adaptorModule, exportedFunctions),
+          expressionEntrypoint(
+            ctx,
+            asyncOperations(ctx, sourceFile.statements)
+          ),
+        ]);
+      };
+    }
   };
 }
 

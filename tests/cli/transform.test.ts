@@ -1,9 +1,15 @@
-import yargs from "yargs";
+import yargs, { CommandModule } from "yargs";
 
 import * as transform from "../../src/cli/transform";
+const commandModule = {
+  command: transform.command,
+  describe: transform.describe,
+  builder: transform.builder,
+  handler: () => {},
+};
 
 it.skip("returns help output", async () => {
-  const parser = yargs.command(transform);
+  const parser = yargs.command(commandModule);
 
   // Run the command module with --help as argument
   const output: string = await new Promise((resolve) => {
@@ -21,24 +27,19 @@ it.skip("returns help output", async () => {
 });
 
 function buildParser(parser: yargs.Argv): (command: string) => Promise<any> {
-  return (command: string) =>
-    new Promise((resolve, reject) => {
-      parser.parse(command, (err, argv, _output) => {
-        if (err) reject(err.message);
-
-        resolve(argv);
-      });
-    });
+  return (command: string) => parser.parseAsync(command);
 }
 
 it("can parse the location of the expression file", async () => {
-  const parse = buildParser(yargs.command(transform));
+  const parse = buildParser(yargs.command(commandModule));
 
   await expect(parse("transform foo.js")).rejects.toMatch(
-    "Missing required argument: transformer"
+    "Missing required arguments: transformer, adaptor"
   );
 
-  await expect(parse("transform -t legacy foo.js")).resolves.toEqual(
+  await expect(
+    parse("transform -a @test/adaptor -t legacy foo.js")
+  ).resolves.toEqual(
     expect.objectContaining({
       expression: "foo.js",
       transformer: "legacy",

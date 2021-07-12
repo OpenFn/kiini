@@ -71,6 +71,7 @@ export class BaseCompiler {
     const typedModulePath = moduleName.replace("@", "").replace("/", "__");
 
     this.fsMap.set(`/node_modules/@types/${typedModulePath}/index.d.ts`, dts);
+    this.env.createFile(`${typedModulePath}.d.ts`, dts);
   }
 
   addAdaptorFSMap(adaptorPackagePath: string) {
@@ -85,11 +86,11 @@ export class BaseCompiler {
   }
 
   public get program(): ts.Program {
-    return this.env.languageService.getProgram();
+    return this.env.languageService.getProgram()!;
   }
 
   public get sourceFile(): ts.SourceFile {
-    return this.program.getSourceFile("index.ts");
+    return this.program.getSourceFile("index.ts")!;
   }
 
   addExpression(expression: string, filename: string = "index.ts") {
@@ -141,9 +142,9 @@ export class BaseCompiler {
       }
     );
     // console.log(sourceFile.getText());
-    // console.log(emitResult);
+    console.log(emitResult.diagnostics);
     // console.log(program.getSourceFile("index.ts"));
-    return this.system.readFile("index.js");
+    return this.system.readFile("index.js")!;
   }
 
   static compilerOpts: ts.CompilerOptions = {
@@ -162,9 +163,8 @@ export class BaseCompiler {
   };
 
   transform(): ts.TransformationResult<ts.Node> {
-    const sourceFile = this.program.getSourceFile("index.ts");
     const transformedSourceFile = ts.transform(
-      sourceFile,
+      this.sourceFile,
       [transformer(this.program, this.transformOptions)],
       BaseCompiler.compilerOpts
     );

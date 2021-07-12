@@ -115,4 +115,21 @@ describe("compiler", () => {
       )
     );
   });
+
+  it("can give access to type defs", async () => {
+    const compiler = new BaseCompiler();
+    const expression = "adaptor.get()";
+    compiler.addExpression(expression);
+    compiler.useTransform(testTransformer);
+
+    const moduleName = "language-http";
+    const dtsPath = await dtsResolve(
+      join(__dirname, "../fixtures"),
+      moduleName
+    );
+    const dts = readFileSync(dtsPath, "utf8");
+    compiler.addTypeDefinition(moduleName, dts);
+
+    const result = compiler.compile();
+  });
 });
