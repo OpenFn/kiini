@@ -3,7 +3,7 @@
   "compilerOptions": {
     // Transpilation settings.
     "module": "ES2020",
-    "target": "ES6",
+    "target": "ES2020",
     // Output settings.
     "charset": "utf-8",
     "newLine": "LF",
