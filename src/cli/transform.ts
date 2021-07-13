@@ -49,7 +49,7 @@ export async function handler({ expression, adaptor }: CliTransformOptions) {
     // @openfn/language-http
     // TODO: possibly allow aliasing, 'check against this adaptor', have
     // the compiler put 'this alias' in the output.
-    const dtsPath = await dtsResolve(join(__dirname, "../"), adaptor);
+    const dtsPath = await dtsResolve(process.cwd(), adaptor);
     const dts = readFileSync(dtsPath, "utf8");
     compiler.addTypeDefinition(adaptor, dts);
 

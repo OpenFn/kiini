@@ -103,7 +103,7 @@ export class BaseCompiler {
 
   getDiagnostics(): readonly ts.Diagnostic[] {
     return ts.getPreEmitDiagnostics(this.program, this.sourceFile);
-    return this.env.languageService.getSemanticDiagnostics("index.ts");
+    // return this.env.languageService.getSemanticDiagnostics("index.ts");
   }
 
   formatDiagnostics(): string[] {
