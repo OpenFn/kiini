@@ -141,9 +141,7 @@ export class BaseCompiler {
         afterDeclarations: [],
       }
     );
-    // console.log(sourceFile.getText());
-    console.log(emitResult.diagnostics);
-    // console.log(program.getSourceFile("index.ts"));
+
     return this.system.readFile("index.js")!;
   }
 

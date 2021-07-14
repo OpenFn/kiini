@@ -1,7 +1,6 @@
 import { join } from "path/posix";
 import { LegacyCompiler } from "../../src/compiler/LegacyCompiler";
-import { format } from "../Utils";
-import { dtsResolve, packageResolve } from "../../src/resolver";
+import { dtsResolve } from "../../src/resolver";
 import { readFileSync } from "fs";
 
 describe("compiler", () => {

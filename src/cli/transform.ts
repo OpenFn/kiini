@@ -2,7 +2,6 @@ import yargs from "yargs";
 import { readFileSync } from "fs";
 import { LegacyCompiler } from "../compiler";
 import { dtsResolve } from "../resolver";
-import { join } from "path";
 
 export const command = "transform [options] <expression>";
 
@@ -53,7 +52,9 @@ export async function handler({ expression, adaptor }: CliTransformOptions) {
     const dts = readFileSync(dtsPath, "utf8");
     compiler.addTypeDefinition(adaptor, dts);
 
-    console.log(compiler.formatDiagnostics());
+    compiler
+      .formatDiagnostics()
+      .forEach((diagnostic) => console.error(diagnostic));
     const result = compiler.compile();
 
     process.stdout.write(result);

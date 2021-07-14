@@ -148,7 +148,6 @@ function legacyTransform(
       adaptorDts.symbol.exports!.forEach((key, value) => {
         exportedFunctions.push(String(value));
       });
-      console.log(exportedFunctions);
 
       return (sourceFile: ts.SourceFile) => {
         return factory.updateSourceFile(sourceFile, [
