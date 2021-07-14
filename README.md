@@ -2,6 +2,8 @@
 
 OpenFn Future Compiler
 
+See [OpenFn/core](https://github.com/OpenFn/core)
+
 ## CLI
 
 ### `transform`
